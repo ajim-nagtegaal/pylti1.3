@@ -569,7 +569,11 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
 
             try:
                 logging.warning("fetch_public_key: public key NOT found in cache")
-                resp = self._requests_session.get(key_set_url)
+                proxies = {
+                    "http": "http://serverproxy.forux.nl:3128",
+                    "https": "http://serverproxy.forux.nl:3128",
+                }
+                resp = self._requests_session.get(key_set_url, proxies=proxies)
             except requests.exceptions.RequestException as e:
                 raise LtiException(
                     f"Error during fetch URL {key_set_url}: {str(e)}"
