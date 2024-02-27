@@ -714,12 +714,14 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
         public_key, key_alg = self.get_public_key()
         logging.warning("validate_jwt_signature: public_key: %s", public_key)
         try:
+            logging.warning("validate_jwt_signature: start decode")
             jwt.decode(
                 id_token,
                 public_key,
                 algorithms=[key_alg],
                 options=self._jwt_verify_options,
             )
+            logging.warning("validate_jwt_signature: end decode")
         except jwt.InvalidTokenError as e:
             raise LtiException(f"Can't decode id_token: {str(e)}") from e
 
