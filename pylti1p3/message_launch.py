@@ -587,8 +587,9 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
     def get_public_key(self) -> t.Tuple[str, str]:
         assert self._registration is not None, "Registration not yet set"
         public_key_set = self._registration.get_key_set()
+        logging.warning("get_public_key: public_key_set %s" % (public_key_set))
         key_set_url = self._registration.get_key_set_url()
-
+        logging.warning("get_public_key: key_set_url %s" % (key_set_url))
         if not public_key_set:
             assert (
                 key_set_url is not None
@@ -709,7 +710,6 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
     def validate_jwt_signature(self) -> "MessageLaunch":
         logging.warning("validate_jwt_signature: Start validate")
         id_token = self._get_id_token()
-        logging.warning("validate_jwt_signature: id_token: %s", id_token)
         # Fetch public key object
         public_key, key_alg = self.get_public_key()
         logging.warning("validate_jwt_signature: public_key: %s", public_key)
