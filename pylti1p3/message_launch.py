@@ -559,14 +559,16 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
         cache_key = (
             "key-set-url-" + hashlib.md5(key_set_url.encode("utf-8")).hexdigest()
         )
-
+        logging.warning("fetch_public_key: cache_key %s" % (cache_key))
         with DisableSessionId(self._public_key_cache_data_storage):
             if self._public_key_cache_data_storage:
                 public_key = self._public_key_cache_data_storage.get_value(cache_key)
                 if public_key:
+                    logging.warning("fetch_public_key: public key found in cache")
                     return public_key
 
             try:
+                logging.warning("fetch_public_key: public key NOT found in cache")
                 resp = self._requests_session.get(key_set_url)
             except requests.exceptions.RequestException as e:
                 raise LtiException(
@@ -578,6 +580,7 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
                     self._public_key_cache_data_storage.set_value(
                         cache_key, public_key, self._public_key_cache_lifetime
                     )
+                logging.warning("fetch_public_key: public key loaded")
                 return public_key
             except ValueError as e:
                 raise LtiException(
