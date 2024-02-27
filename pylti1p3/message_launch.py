@@ -5,6 +5,7 @@ import typing as t
 import uuid
 from abc import ABCMeta, abstractmethod
 
+import logging
 import jwt  # type: ignore
 import requests
 import typing_extensions as te
@@ -706,11 +707,12 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
         return self
 
     def validate_jwt_signature(self) -> "MessageLaunch":
+        logging.info("validate_jwt_signature: Start validate")
         id_token = self._get_id_token()
-
+        logging.info("validate_jwt_signature: id_token: %s", id_token)
         # Fetch public key object
         public_key, key_alg = self.get_public_key()
-
+        logging.info("validate_jwt_signature: public_key: %s", public_key)
         try:
             jwt.decode(
                 id_token,
