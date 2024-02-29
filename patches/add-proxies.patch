@@ -1,0 +1,96 @@
+diff --git a/pylti1p3/message_launch.py b/pylti1p3/message_launch.py
+index 4143900..788e07b 100644
+--- a/pylti1p3/message_launch.py
++++ b/pylti1p3/message_launch.py
+@@ -1,6 +1,7 @@
+ import base64
+ import hashlib
+ import json
++import logging
+ import typing as t
+ import uuid
+ from abc import ABCMeta, abstractmethod
+@@ -23,22 +24,21 @@ from .message_validators.privacy_launch import PrivacyLaunchValidator
+ from .message_validators.resource_message import ResourceMessageValidator
+ from .message_validators.submission_review import SubmissionReviewLaunchValidator
+ from .names_roles import NamesRolesProvisioningService, TNamesAndRolesData
++from .registration import Registration, TKeySet
++from .request import Request
+ from .roles import (
++    DesignerRole,
++    ObserverRole,
+     StaffRole,
+     StudentRole,
+     TeacherRole,
+     TeachingAssistantRole,
+-    DesignerRole,
+-    ObserverRole,
+     TransientRole,
+ )
+-from .registration import Registration, TKeySet
+-from .request import Request
++from .service_connector import REQUESTS_USER_AGENT, ServiceConnector
+ from .session import SessionService
+-from .service_connector import ServiceConnector, REQUESTS_USER_AGENT
+ from .tool_config import ToolConfAbstract
+ 
+-
+ TResourceLinkClaim = te.TypedDict(
+     "TResourceLinkClaim",
+     {
+@@ -558,7 +558,6 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
+         cache_key = (
+             "key-set-url-" + hashlib.md5(key_set_url.encode("utf-8")).hexdigest()
+         )
+-
+         with DisableSessionId(self._public_key_cache_data_storage):
+             if self._public_key_cache_data_storage:
+                 public_key = self._public_key_cache_data_storage.get_value(cache_key)
+@@ -566,7 +565,12 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
+                     return public_key
+ 
+             try:
+-                resp = self._requests_session.get(key_set_url)
++                # @TODO: get proxy from env
++                proxies = {
++                    "http": "http://serverproxy.forux.nl:3128",
++                    "https": "http://serverproxy.forux.nl:3128",
++                }
++                resp = self._requests_session.get(key_set_url, proxies=proxies)
+             except requests.exceptions.RequestException as e:
+                 raise LtiException(
+                     f"Error during fetch URL {key_set_url}: {str(e)}"
+@@ -586,8 +590,9 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
+     def get_public_key(self) -> t.Tuple[str, str]:
+         assert self._registration is not None, "Registration not yet set"
+         public_key_set = self._registration.get_key_set()
++        logging.warning("get_public_key: public_key_set %s" % (public_key_set))
+         key_set_url = self._registration.get_key_set_url()
+-
++        logging.warning("get_public_key: key_set_url %s" % (key_set_url))
+         if not public_key_set:
+             assert (
+                 key_set_url is not None
+@@ -706,18 +711,20 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
+         return self
+ 
+     def validate_jwt_signature(self) -> "MessageLaunch":
++        logging.warning("validate_jwt_signature: Start validate")
+         id_token = self._get_id_token()
+-
+         # Fetch public key object
+         public_key, key_alg = self.get_public_key()
+-
++        logging.warning("validate_jwt_signature: public_key: %s", public_key)
+         try:
++            logging.warning("validate_jwt_signature: start decode")
+             jwt.decode(
+                 id_token,
+                 public_key,
+                 algorithms=[key_alg],
+                 options=self._jwt_verify_options,
+             )
++            logging.warning("validate_jwt_signature: end decode")
+         except jwt.InvalidTokenError as e:
+             raise LtiException(f"Can't decode id_token: {str(e)}") from e
+ 

@@ -1,0 +1,66 @@
+From 4fcbf583f26f994e0e25e084c2abea6dfea70034 Mon Sep 17 00:00:00 2001
+From: Christian Lawson-Perfect <christianperfect@gmail.com>
+Date: Fri, 16 Feb 2024 10:09:07 +0000
+Subject: [PATCH] deep link: support HTML content type
+
+The DeepLink object now has a `get_accept_types` method which will
+return the list of content types that the platform will accept for this
+launch.
+
+The DeepLinkResource object now has `get_html` and `set_html` methods,
+which are used when the type is `"html"`.
+---
+ pylti1p3/deep_link.py          |  3 +++
+ pylti1p3/deep_link_resource.py | 11 +++++++++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/pylti1p3/deep_link.py b/pylti1p3/deep_link.py
+index fdce52c..ff0015a 100644
+--- a/pylti1p3/deep_link.py
++++ b/pylti1p3/deep_link.py
+@@ -66,6 +66,9 @@ def get_message_jwt(
+         }
+         return message_jwt
+ 
++    def get_accept_types(self) -> t.List[str]:
++        return self._deep_link_settings.get('accept_types', [])
++
+     def encode_jwt(self, message):
+         headers = None
+         kid = self._registration.get_kid()
+diff --git a/pylti1p3/deep_link_resource.py b/pylti1p3/deep_link_resource.py
+index 131606f..d42198f 100644
+--- a/pylti1p3/deep_link_resource.py
++++ b/pylti1p3/deep_link_resource.py
+@@ -7,6 +7,7 @@ class DeepLinkResource:
+     _title: t.Optional[str] = None
+     _url: t.Optional[str] = None
+     _lineitem: t.Optional[LineItem] = None
++    _html: t.Optional[str] = None
+     _custom_params: t.Mapping[str, str] = {}
+     _target: str = "iframe"
+     _icon_url: t.Optional[str] = None
+@@ -60,6 +61,13 @@ def set_icon_url(self, value: str) -> "DeepLinkResource":
+         self._icon_url = value
+         return self
+ 
++    def set_html(self, value: str) -> "DeepLinkResource":
++        self._html = value
++        return self
++
++    def get_html(self) -> str:
++        return self._html
++
+     def to_dict(self) -> t.Dict[str, object]:
+         res: t.Dict[str, object] = {
+             "type": self._type,
+@@ -90,6 +98,9 @@ def to_dict(self) -> t.Dict[str, object]:
+ 
+             res["lineItem"] = line_item
+ 
++        if self._html:
++            res["html"] = self._html
++
+         if self._icon_url:
+             res["icon"] = {"url": self._icon_url}
+ 
