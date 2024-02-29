@@ -1,11 +1,11 @@
 import base64
 import hashlib
 import json
+import logging
 import typing as t
 import uuid
 from abc import ABCMeta, abstractmethod
 
-import logging
 import jwt  # type: ignore
 import requests
 import typing_extensions as te
@@ -24,21 +24,20 @@ from .message_validators.privacy_launch import PrivacyLaunchValidator
 from .message_validators.resource_message import ResourceMessageValidator
 from .message_validators.submission_review import SubmissionReviewLaunchValidator
 from .names_roles import NamesRolesProvisioningService, TNamesAndRolesData
+from .registration import Registration, TKeySet
+from .request import Request
 from .roles import (
+    DesignerRole,
+    ObserverRole,
     StaffRole,
     StudentRole,
     TeacherRole,
     TeachingAssistantRole,
-    DesignerRole,
-    ObserverRole,
     TransientRole,
 )
-from .registration import Registration, TKeySet
-from .request import Request
+from .service_connector import REQUESTS_USER_AGENT, ServiceConnector
 from .session import SessionService
-from .service_connector import ServiceConnector, REQUESTS_USER_AGENT
 from .tool_config import ToolConfAbstract
-
 
 TResourceLinkClaim = te.TypedDict(
     "TResourceLinkClaim",
@@ -559,16 +558,14 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
         cache_key = (
             "key-set-url-" + hashlib.md5(key_set_url.encode("utf-8")).hexdigest()
         )
-        logging.warning("fetch_public_key: cache_key %s" % (cache_key))
         with DisableSessionId(self._public_key_cache_data_storage):
             if self._public_key_cache_data_storage:
                 public_key = self._public_key_cache_data_storage.get_value(cache_key)
                 if public_key:
-                    logging.warning("fetch_public_key: public key found in cache")
                     return public_key
 
             try:
-                logging.warning("fetch_public_key: public key NOT found in cache")
+                # @TODO: get proxy from env
                 proxies = {
                     "http": "http://serverproxy.forux.nl:3128",
                     "https": "http://serverproxy.forux.nl:3128",
@@ -584,7 +581,6 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
                     self._public_key_cache_data_storage.set_value(
                         cache_key, public_key, self._public_key_cache_lifetime
                     )
-                logging.warning("fetch_public_key: public key loaded")
                 return public_key
             except ValueError as e:
                 raise LtiException(
