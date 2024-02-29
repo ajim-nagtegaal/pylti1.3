@@ -2,6 +2,7 @@ import base64
 import hashlib
 import json
 import logging
+import os
 import typing as t
 import uuid
 from abc import ABCMeta, abstractmethod
@@ -565,11 +566,8 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
                     return public_key
 
             try:
-                # @TODO: get proxy from env
-                proxies = {
-                    "http": "http://serverproxy.forux.nl:3128",
-                    "https": "http://serverproxy.forux.nl:3128",
-                }
+                # Get proxies from env.
+                proxies = self.get_proxies()
                 resp = self._requests_session.get(key_set_url, proxies=proxies)
             except requests.exceptions.RequestException as e:
                 raise LtiException(
@@ -833,3 +831,18 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
     def check_transient(self) -> bool:
         jwt_body = self._get_jwt_body()
         return TransientRole(jwt_body).check()
+
+    def get_proxies():
+        # Get proxies fom os.environment
+        if os.environ.get("HTTP_PROXY") is not None:
+            proxy_http = os.environ.get("HTTP_PROXY")
+        else:
+            proxy_http = ""
+        if os.environ.get("HTTPS_PROXY") is not None:
+            proxy_https = os.environ.get("HTTPS_PROXY")
+        else:
+            proxy_https = ""
+        return {
+            "http": proxy_http,
+            "https": proxy_https,
+        }
