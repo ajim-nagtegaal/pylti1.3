@@ -571,7 +571,7 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
             try:
                 # Get proxies from env.
                 proxies = self.get_proxies()
-                logging.warning("fetch_public_key: Get from %" % (key_set_url))
+                logging.warning("fetch_public_key: Get from %s" % (key_set_url))
                 resp = self._requests_session.get(key_set_url, proxies=proxies)
             except requests.exceptions.RequestException as e:
                 raise LtiException(
