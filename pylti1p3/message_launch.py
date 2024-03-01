@@ -6,6 +6,7 @@ import os
 import typing as t
 import uuid
 from abc import ABCMeta, abstractmethod
+from dotenv import load_dotenv
 
 import jwt  # type: ignore
 import requests
@@ -835,6 +836,7 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
         return TransientRole(jwt_body).check()
 
     def get_proxies(self):
+        load_dotenv(override=True)
         # Get proxies fom os.environment. Env variable names are case-sensitive.
         if os.environ.get("http_proxy") is not None:
             proxy_http = os.environ.get("http_proxy")
