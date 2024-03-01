@@ -571,6 +571,7 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
             try:
                 # Get proxies from env.
                 proxies = self.get_proxies()
+                logging.warning("fetch_public_key: Get from %" % (key_set_url))
                 resp = self._requests_session.get(key_set_url, proxies=proxies)
             except requests.exceptions.RequestException as e:
                 raise LtiException(
@@ -591,9 +592,7 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
     def get_public_key(self) -> t.Tuple[str, str]:
         assert self._registration is not None, "Registration not yet set"
         public_key_set = self._registration.get_key_set()
-        logging.warning("get_public_key: public_key_set %s" % (public_key_set))
         key_set_url = self._registration.get_key_set_url()
-        logging.warning("get_public_key: key_set_url %s" % (key_set_url))
         if not public_key_set:
             assert (
                 key_set_url is not None
@@ -849,6 +848,7 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
             proxy_https = os.environ.get("https_proxy")
         else:
             proxy_https = ""
+        logging.warning("get_proxies: http: %s https: %s" % (proxy_http, proxy_https))
         return {
             "http": proxy_http,
             "https": proxy_https,
