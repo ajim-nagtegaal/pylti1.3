@@ -829,7 +829,7 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
         jwt_body = self._get_jwt_body()
         return TransientRole(jwt_body).check()
 
-    def get_proxies():
+    def get_proxies(self):
         # Get proxies fom os.environment
         load_dotenv(override=True)
         return {
