@@ -836,21 +836,17 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
 
     def get_proxies(self):
         # Get proxies fom os.environment. Env variable names are case-sensitive.
-        if os.environ.get("HTTP_PROXY") is not None:
-            proxy_http = os.environ.get("HTTP_PROXY")
-        elif os.environ.get("http_proxy") is not None:
+        if os.environ.get("http_proxy") is not None:
             proxy_http = os.environ.get("http_proxy")
         else:
             proxy_http = ""
-        if os.environ.get("HTTPS_PROXY") is not None:
-            proxy_https = os.environ.get("HTTPS_PROXY")
-        elif os.environ.get("https_proxy") is not None:
+        if os.environ.get("https_proxy") is not None:
             proxy_https = os.environ.get("https_proxy")
         else:
             proxy_https = ""
         logging.warning(
             "get_proxies: http: %s https: %s"
-            % (os.environ.get("HTTP_PROXY"), os.environ.get("HTTPS_PROXY"))
+            % (os.environ.get("http_proxy"), os.environ.get("https_proxy"))
         )
         return {
             "http": proxy_http,
