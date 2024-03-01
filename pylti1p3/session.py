@@ -28,6 +28,7 @@ class SessionService:
         )
 
     def _set_value(self, key: str, value: object):
+        logging.warning("_set_value: datastorage: %s" % (self.data_storage))
         self.data_storage.set_value(key, value, exp=self._launch_data_lifetime)
 
     def _get_value(self, key: str) -> t.Any:
@@ -35,12 +36,15 @@ class SessionService:
 
     def get_launch_data(self, key: str) -> TJwtBody:
         key = self._get_key(key, add_prefix=False)
-        logging.warning("Launch data key: %s" % (key))
+        logging.warning("get_launch_data: Launch data key: %s" % (key))
         value = self._get_value(key)
-        logging.warning("Launch data found: %s" % (value))
+        logging.warning("get_launch_data: Launch data found: %s" % (value))
         return self._get_value(self._get_key(key, add_prefix=False))
 
     def save_launch_data(self, key: str, jwt_body: TJwtBody):
+        logging.warning("save_launch_datakey: input key: %s" % (key))
+        newkey = self._get_key(key, add_prefix=False)
+        logging.warning("save_launch_datakey: found key: %s" % (newkey))
         self._set_value(self._get_key(key, add_prefix=False), jwt_body)
 
     def save_nonce(self, nonce: str):

@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import json
+import logging
 import os
 import typing as t
 import uuid
@@ -786,9 +787,11 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
         return self
 
     def save_launch_data(self) -> "MessageLaunch":
+        logging.warning("save_launch_data")
         state_from_request = self._get_request_param("state")
+        logging.warning("save_launch_data:state_from_request %s" % (state_from_request))
         id_token_hash = self._get_id_token_hash()
-
+        logging.warning("save_launch_data:id_token_hash %s" % (id_token_hash))
         self._session_service.save_launch_data(self._launch_id, self._jwt["body"])
         self._session_service.set_state_valid(state_from_request, id_token_hash)
         return self
