@@ -848,7 +848,10 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
             proxy_https = os.environ.get("https_proxy")
         else:
             proxy_https = ""
-        logging.warning("get_proxies: http: %s https: %s" % (proxy_http, proxy_https))
+        logging.warning(
+            "get_proxies: http: %s https: %s"
+            % (os.environ.get("HTTP_PROXY"), os.environ.get("HTTPS_PROXY"))
+        )
         return {
             "http": proxy_http,
             "https": proxy_https,
