@@ -789,7 +789,6 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
     def save_launch_data(self) -> "MessageLaunch":
         state_from_request = self._get_request_param("state")
         id_token_hash = self._get_id_token_hash()
-        logging.warning("save_launch_data:id_token_hash %s" % (id_token_hash))
         self._session_service.save_launch_data(self._launch_id, self._jwt["body"])
         self._session_service.set_state_valid(state_from_request, id_token_hash)
         return self

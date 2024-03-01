@@ -1,4 +1,3 @@
-import logging
 import typing as t
 
 from .launch_data_storage.base import LaunchDataStorage
@@ -34,16 +33,9 @@ class SessionService:
         return self.data_storage.get_value(key)
 
     def get_launch_data(self, key: str) -> TJwtBody:
-        key = self._get_key(key, add_prefix=False)
-        logging.warning("get_launch_data: Launch data key: %s" % (key))
-        value = self._get_value(key)
-        logging.warning("get_launch_data: Launch data found: %s" % (value))
         return self._get_value(self._get_key(key, add_prefix=False))
 
     def save_launch_data(self, key: str, jwt_body: TJwtBody):
-        logging.warning("save_launch_datakey: input key: %s" % (key))
-        newkey = self._get_key(key, add_prefix=False)
-        logging.warning("save_launch_datakey: found key: %s" % (newkey))
         self._set_value(self._get_key(key, add_prefix=False), jwt_body)
 
     def save_nonce(self, nonce: str):
