@@ -829,18 +829,10 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
         jwt_body = self._get_jwt_body()
         return TransientRole(jwt_body).check()
 
-    def get_proxies(self):
+    def get_proxies():
+        # Get proxies fom os.environment
         load_dotenv(override=True)
-        # Get proxies fom os.environment. Env variable names are case-sensitive.
-        if os.environ.get("http_proxy") is not None:
-            proxy_http = os.environ.get("http_proxy")
-        else:
-            proxy_http = ""
-        if os.environ.get("https_proxy") is not None:
-            proxy_https = os.environ.get("https_proxy")
-        else:
-            proxy_https = ""
         return {
-            "http": proxy_http,
-            "https": proxy_https,
+            "http": os.environ.get("http_proxy"),
+            "https": os.environ.get("https_proxy"),
         }
