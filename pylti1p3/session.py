@@ -1,3 +1,4 @@
+import logging
 import typing as t
 from .launch_data_storage.session import SessionDataStorage
 from .request import Request
@@ -33,6 +34,10 @@ class SessionService:
         return self.data_storage.get_value(key)
 
     def get_launch_data(self, key: str) -> TJwtBody:
+        key = self._get_key(key, add_prefix=False)
+        logging.warning("Launch data key: %s" % (key))
+        value = self._get_value(key)
+        logging.warning("Launch data found: %s" % (value))
         return self._get_value(self._get_key(key, add_prefix=False))
 
     def save_launch_data(self, key: str, jwt_body: TJwtBody):
