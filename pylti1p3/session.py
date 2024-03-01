@@ -1,9 +1,9 @@
 import logging
 import typing as t
+
+from .launch_data_storage.base import LaunchDataStorage
 from .launch_data_storage.session import SessionDataStorage
 from .request import Request
-from .launch_data_storage.base import LaunchDataStorage
-
 
 TStateParams = t.Dict[str, object]
 TJwtBody = t.Mapping[str, t.Any]
@@ -28,7 +28,6 @@ class SessionService:
         )
 
     def _set_value(self, key: str, value: object):
-        logging.warning("_set_value: datastorage: %s" % (self.data_storage))
         self.data_storage.set_value(key, value, exp=self._launch_data_lifetime)
 
     def _get_value(self, key: str) -> t.Any:
