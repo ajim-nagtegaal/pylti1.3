@@ -1,16 +1,15 @@
 import base64
 import hashlib
 import json
-import logging
 import os
 import typing as t
 import uuid
 from abc import ABCMeta, abstractmethod
-from dotenv import load_dotenv
 
 import jwt  # type: ignore
 import requests
 import typing_extensions as te
+from dotenv import load_dotenv
 from jwcrypto.jwk import JWK  # type: ignore
 
 from .actions import Action
@@ -572,7 +571,6 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
             try:
                 # Get proxies from env.
                 proxies = self.get_proxies()
-                logging.warning("fetch_public_key: Get from %s" % (key_set_url))
                 resp = self._requests_session.get(key_set_url, proxies=proxies)
             except requests.exceptions.RequestException as e:
                 raise LtiException(
@@ -712,20 +710,16 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
         return self
 
     def validate_jwt_signature(self) -> "MessageLaunch":
-        logging.warning("validate_jwt_signature: Start validate")
         id_token = self._get_id_token()
         # Fetch public key object
         public_key, key_alg = self.get_public_key()
-        logging.warning("validate_jwt_signature: public_key: %s", public_key)
         try:
-            logging.warning("validate_jwt_signature: start decode")
             jwt.decode(
                 id_token,
                 public_key,
                 algorithms=[key_alg],
                 options=self._jwt_verify_options,
             )
-            logging.warning("validate_jwt_signature: end decode")
         except jwt.InvalidTokenError as e:
             raise LtiException(f"Can't decode id_token: {str(e)}") from e
 
@@ -846,10 +840,6 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
             proxy_https = os.environ.get("https_proxy")
         else:
             proxy_https = ""
-        logging.warning(
-            "get_proxies: http: %s https: %s"
-            % (os.environ.get("http_proxy"), os.environ.get("https_proxy"))
-        )
         return {
             "http": proxy_http,
             "https": proxy_https,
