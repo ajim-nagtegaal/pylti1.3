@@ -293,7 +293,10 @@ class MessageLaunch(t.Generic[REQ, TCONF, SES, COOK]):
             launch_data_storage=launch_data_storage,
             requests_session=requests_session,
         )
-        launch_data = obj.get_session_service().get_launch_data(launch_id)
+        sessions_service = obj.get_session_service()
+        if not sessions_service:
+            raise LtiException("Session Service not set")
+        launch_data = sessions_service.get_launch_data(launch_id)
         if not launch_data:
             raise LtiException("Launch data not found")
         return (
